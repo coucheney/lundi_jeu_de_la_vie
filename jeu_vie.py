@@ -11,6 +11,7 @@
 # import des librairies
 
 import tkinter as tk
+import copy
 
 
 ########################
@@ -82,6 +83,41 @@ def creer_tableau():
     # tableau = [tableau_col for i in range(NB_COL)]
 
 
+def compte_vivant(i, j):
+    """Retourne le nombre de cases voisines vivantes auotur de la case (i, j)"""
+    return 0
+
+
+def traite_case(i, j):
+    """Traite la case à la colonne i et ligne j en retournant la nouvelle valeur du tableau"""
+    nb_vivant = compte_vivant(i, j)
+    if tableau[i][j] == -1:
+        if nb_vivant == 3:
+            x, y = i * COTE, j * COTE
+            carre = canvas.create_rectangle(x, y, x + COTE,
+                                            y + COTE, fill=COULEUR_VIVANT,
+                                            outline=COULEUR_QUADR)
+            return carre
+        else:
+            return -1
+    else:
+        if nb_vivant != 2 and nb_vivant != 3:
+            canvas.delete(tableau[i][j])
+            return -1
+        else:
+            return tableau[i][j]
+
+
+def etape(event):
+    """Fait une étape du jeu de la vie"""
+    tableau_res = copy.deepcopy(tableau)
+    for i in range(NB_COL):
+        for j in range(NB_LINE):
+            tableau_res[i][j] = traite_case(i, j)
+    tableau = tableau_res
+
+
+
 ########################
 # programme principal
 
@@ -95,5 +131,6 @@ creer_tableau()
 canvas.grid(row=0)
 # liaison des événements
 canvas.bind("<Button-1>", change_carre)
+racine.bind("n", etape)
 # boucle principale
 racine.mainloop()
