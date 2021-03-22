@@ -23,7 +23,7 @@ COULEUR_VIVANT = "yellow"
 LARGEUR = 600
 HAUTEUR = 400
 # la longueur des carrés qui constituent le quadrillage
-COTE = 100
+COTE = 20
 NB_COL = LARGEUR // COTE
 NB_LINE = HAUTEUR // COTE
 
@@ -84,12 +84,19 @@ def creer_tableau():
 
 
 def compte_vivant(i, j):
-    """Retourne le nombre de cases voisines vivantes auotur de la case (i, j)"""
-    return 0
+    """Retourne le nombre de cases voisines vivantes
+       autour de la case (i, j)"""
+    cpt = 0
+    for k in range(max(0, i-1), min(NB_COL, i+2)):
+        for el in range(max(0, j-1), min(NB_LINE, j+2)):
+            if tableau[k][el] != -1 and [k, el] != [i, j]:
+                cpt += 1
+    return cpt
 
 
 def traite_case(i, j):
-    """Traite la case à la colonne i et ligne j en retournant la nouvelle valeur du tableau"""
+    """Traite la case à la colonne i et ligne j en
+       retournant la nouvelle valeur du tableau"""
     nb_vivant = compte_vivant(i, j)
     if tableau[i][j] == -1:
         if nb_vivant == 3:
@@ -110,12 +117,12 @@ def traite_case(i, j):
 
 def etape(event):
     """Fait une étape du jeu de la vie"""
+    global tableau
     tableau_res = copy.deepcopy(tableau)
     for i in range(NB_COL):
         for j in range(NB_LINE):
             tableau_res[i][j] = traite_case(i, j)
     tableau = tableau_res
-
 
 
 ########################
