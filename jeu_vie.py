@@ -31,6 +31,8 @@ NB_LINE = HAUTEUR // COTE
 # Variables globales
 
 tableau = None
+cpt = 0
+delai = 500
 
 ########################
 # fonctions
@@ -115,7 +117,7 @@ def traite_case(i, j):
             return tableau[i][j]
 
 
-def etape(event):
+def etape():
     """Fait une étape du jeu de la vie"""
     global tableau
     tableau_res = copy.deepcopy(tableau)
@@ -123,6 +125,14 @@ def etape(event):
         for j in range(NB_LINE):
             tableau_res[i][j] = traite_case(i, j)
     tableau = tableau_res
+
+
+def etape_n(event):
+    """
+       Fait une étape du jeu de la vie en appelant la
+       fonction etape sans argument
+    """
+    etape()
 
 
 def sauvegarder():
@@ -139,7 +149,7 @@ def charger():
     fic = open("sauvegarde.txt", "r")
     cpt = 0
     for ligne in fic:
-        i , j = cpt%NB_COL, cpt//NB_COL
+        i, j = cpt % NB_COL, cpt // NB_COL
         if tableau[i][j] != -1:
             canvas.delete(tableau[i][j])
         n = int(ligne)
@@ -150,9 +160,49 @@ def charger():
             carre = canvas.create_rectangle(x, y, x + COTE,
                                             y + COTE, fill=COULEUR_VIVANT,
                                             outline=COULEUR_QUADR)
-            tableau[i][j] = carre 
-        cpt += 1          
+            tableau[i][j] = carre
+        cpt += 1
     fic.close()
+
+
+def start():
+    """Démarre l'automate en mode animation"""
+    global id_after
+    etape()
+    id_after = racine.after(delai, start)
+
+
+def stop():
+    """Interrompt l'animation du jeu de la vie"""
+    racine.after_cancel(id_after)
+
+
+def start_stop():
+    """Change le nom du bouton et démarre ou arrête l'automate"""
+    global cpt
+    if cpt == 0:
+        bout_demarre.config(text="Arrêter")
+        start()
+    else:
+        bout_demarre.config(text="Démarrer")
+        stop()
+    cpt = 1 - cpt
+
+
+def augmente_vitesse(event):
+    """Augmente la vitesse en diminuant la variable delai de 10 ms"""
+    global delai
+    if delai > 10:
+        delai -= 10
+        lbl_vitesse.config(text="delai: " + str(delai))
+
+
+def diminue_vitesse(event):
+    """Diminue la vitesse en augmentant la variable delai de 10 ms"""
+    global delai
+    if delai < 1000:
+        delai += 10
+        lbl_vitesse.config(text="delai: " + str(delai))
 
 
 ########################
@@ -166,12 +216,18 @@ quadrillage()
 creer_tableau()
 bout_sauv = tk.Button(racine, text="sauvegarder", command=sauvegarder)
 bout_charger = tk.Button(racine, text="charger", command=charger)
+bout_demarre = tk.Button(racine, text="Démarrer", command=start_stop)
+lbl_vitesse = tk.Label(racine, text="delai: " + str(delai))
 # placement des widgets
-canvas.grid(row=0, rowspan=2)
+canvas.grid(row=0, rowspan=4)
 bout_sauv.grid(column=1, row=0)
 bout_charger.grid(column=1, row=1)
+bout_demarre.grid(column=1, row=2)
+lbl_vitesse.grid(column=1, row=3)
 # liaison des événements
 canvas.bind("<Button-1>", change_carre)
-racine.bind("n", etape)
+racine.bind("n", etape_n)
+racine.bind("p", augmente_vitesse)
+racine.bind("m", diminue_vitesse)
 # boucle principale
 racine.mainloop()
